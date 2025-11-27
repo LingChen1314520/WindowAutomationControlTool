@@ -15,6 +15,7 @@ class ActionItem(QFrame):
     move_up_clicked = pyqtSignal(str)
     move_down_clicked = pyqtSignal(str)
     enabled_changed = pyqtSignal(str, bool)
+    copy_clicked = pyqtSignal(str)      # 新增：复制信号
 
     def __init__(self, action: Action, index: int, parent=None):
         super().__init__(parent)
@@ -122,6 +123,13 @@ class ActionItem(QFrame):
         self.edit_btn.setStyleSheet(btn_style)
         self.edit_btn.clicked.connect(lambda: self.edit_clicked.emit(self.action.id))
         layout.addWidget(self.edit_btn)
+
+                # 新增：复制按钮
+        self.copy_btn = QPushButton("复制")
+        self.copy_btn.setFixedSize(30, 22)
+        self.copy_btn.setStyleSheet(btn_style)
+        self.copy_btn.clicked.connect(lambda: self.copy_clicked.emit(self.action.id))
+        layout.addWidget(self.copy_btn)
 
         self.delete_btn = QPushButton("✕")
         self.delete_btn.setFixedSize(22, 22)
