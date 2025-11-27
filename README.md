@@ -100,8 +100,9 @@ WindowAutomationControlTool/
 │
 ├── ico_256x256.ico              # 应用/安装程序图标（零界点）
 ├── main.py                      # 程序入口
-├── 零界点.exe                   # 示例/本地打包产物
-├── README.md
+├── 零界点.exe                    # 示例/本地打包产物
+├── README.md                    #说明文档
+├── 零界点安装包.exe              #软件安装包
 └── requirements.txt
 ```
 
