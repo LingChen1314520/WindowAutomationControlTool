@@ -1,0 +1,16 @@
+开加速
+
+更新git
+git add .
+
+备注
+git commit -m "提交的备注"
+
+禁用 SSL 验证：
+git config --global http.sslVerify false
+
+推送：
+git push -u origin master
+
+完成后恢复 SSL 验证：
+git config --global http.sslVerify true

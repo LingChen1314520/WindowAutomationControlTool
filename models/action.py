@@ -83,7 +83,7 @@ class Action:
             enabled=data.get("enabled", True)
         )
 
-    # ★★★ 新增：克隆方法，用于“复制操作”
+    # ★★ 新增：克隆方法，用于“复制操作”
     def clone(self) -> 'Action':
         """克隆当前操作，生成一个新的 Action 对象"""
         data = self.to_dict()
