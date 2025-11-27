@@ -57,7 +57,7 @@
 
 ## 📁 目录结构
 
-当前仓库的主要结构如下（与截图一致）：
+当前仓库的主要结构如下：
 
 ```bash
 WindowAutomationControlTool/
@@ -100,7 +100,7 @@ WindowAutomationControlTool/
 │
 ├── ico_256x256.ico              # 应用/安装程序图标（零界点）
 ├── main.py                      # 程序入口
-├── main.exe                     # 示例/本地打包产物（可选，不一定提交）
+├── main.exe                     # 示例/本地打包产物
 ├── README.md
 └── requirements.txt
 ```
@@ -135,7 +135,9 @@ pyperclip>=1.8.0
 
 ```bash
 cd WindowAutomationControlTool
-python main.py
+python main.py 
+& 
+main.exe
 ```
 
 启动后：
