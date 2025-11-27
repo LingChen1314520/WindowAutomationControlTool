@@ -189,6 +189,7 @@ pip install pyinstaller
 pyinstaller -F -w -i ico_256x256.ico main.py
 ```
 
+
 - `-F`：打成单文件 exe
 - `-w`：不显示控制台窗口
 - `-i ico_256x256.ico`：使用项目图标
