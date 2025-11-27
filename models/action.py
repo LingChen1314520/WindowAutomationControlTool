@@ -82,3 +82,13 @@ class Action:
             order=data.get("order", 0),
             enabled=data.get("enabled", True)
         )
+
+    # ★★★ 新增：克隆方法，用于“复制操作”
+    def clone(self) -> 'Action':
+        """克隆当前操作，生成一个新的 Action 对象"""
+        data = self.to_dict()
+        # 生成新的 ID，避免和原操作冲突
+        data["id"] = str(uuid.uuid4())
+        # 一般复制完会追加在列表末尾，order 可以先保持原样，列表加载时会重新排
+        data["name"] = (self.name or "操作") + " - 副本"
+        return Action.from_dict(data)

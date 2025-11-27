@@ -167,9 +167,9 @@ class SceneDialog(QDialog):
         if self.scene.recognition_image_path and os.path.exists(self.scene.recognition_image_path):
             self._show_image(self.scene.recognition_image_path)
 
-        # 默认场景不能取消默认标记（编辑时）
-        if self.scene.is_default and not self.is_new:
-            self.default_check.setEnabled(False)
+        # # 默认场景不能取消默认标记（编辑时）
+        # if self.scene.is_default and not self.is_new:
+        #     self.default_check.setEnabled(False)
 
         # 加载锚点列表
         self._refresh_anchor_list()

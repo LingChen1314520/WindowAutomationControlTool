@@ -11,6 +11,8 @@ from .widgets import ActionItem
 from .dialogs import ProjectDialog, SceneDialog, ActionDialog
 from PyQt5.QtWidgets import QMenu          # 新增：弹出菜单
 from PyQt5.QtGui import QCursor           # 新增：获取鼠标位置
+import uuid
+from models import Scene
 
 class ProjectPage(QWidget):
     """项目编辑页"""
@@ -483,7 +485,7 @@ class ProjectPage(QWidget):
             item.enabled_changed.connect(self.toggle_action)
                 # 新增：长按排序菜单
             item.long_pressed.connect(self.on_action_long_pressed)
-
+            item.copy_clicked.connect(self.copy_action)             # 新增：复制
             self.action_layout.addWidget(item)
             self.action_items.append(item)
 
@@ -509,6 +511,9 @@ class ProjectPage(QWidget):
 
         menu = QMenu(self)
         menu.addAction("✏️ 编辑").triggered.connect(lambda: self.edit_scene(scene_id))
+
+        copy_action = menu.addAction("📋 复制场景")   # 新增
+        copy_action.triggered.connect(lambda: self.duplicate_scene(scene_id))
 
         # 新增：上移/下移
         move_up_action = menu.addAction("⬆ 上移场景")
@@ -550,26 +555,49 @@ class ProjectPage(QWidget):
         if dialog.exec_() == QDialog.Accepted:
             scene = dialog.get_scene()
             self.current_project.add_scene(scene)
+                    # 如果新场景设为默认，则取消其他场景默认状态
+            if scene.is_default:
+                for s in self.current_project.scenes:
+                    if s.id != scene.id:
+                        s.is_default = False
             self.project_manager.save_project(self.current_project)
             self.load_scenes()
 
     def edit_scene(self, scene_id: str):
+        """编辑场景"""
         if not self.current_project:
             return
+
+        # 1. 找到要编辑的场景
         scene = self.current_project.get_scene(scene_id)
         if not scene:
             return
 
+        # 2. 准备图片保存目录和当前窗口句柄（用于锚点截屏）
         image_dir = self.project_manager.get_project_image_dir(self.current_project.id)
         hwnd = self.current_window.hwnd if self.current_window else None
 
-        dialog = SceneDialog(self,
-                            scene=scene,
-                            project=self.current_project,
-                            hwnd=hwnd,
-                            image_dir=image_dir)
+        # 3. 打开场景编辑对话框
+        dialog = SceneDialog(
+            self,
+            scene=scene,
+            project=self.current_project,
+            hwnd=hwnd,
+            image_dir=image_dir
+        )
+
+        # 4. 只有点击“确定”才处理更新
         if dialog.exec_() == QDialog.Accepted:
-            dialog.get_scene()  # scene 已是引用，直接被修改
+            # 注意：这里一定要接收返回值
+            updated_scene = dialog.get_scene()  # scene 本身已被修改
+
+            # 如果该场景被设为默认，则取消其他所有场景的默认标记
+            if updated_scene.is_default:
+                for s in self.current_project.scenes:
+                    if s.id != updated_scene.id:
+                        s.is_default = False
+
+            # 保存项目并刷新场景列表
             self.project_manager.save_project(self.current_project)
             self.load_scenes()
 
@@ -864,3 +892,42 @@ class ProjectPage(QWidget):
         self.project_manager.save_project(self.current_project)
         self.load_actions()
         self.load_scenes()
+
+    def duplicate_scene(self, scene_id: str):
+        """复制场景"""
+        if not self.current_project:
+            return
+
+        scene = self.current_project.get_scene(scene_id)
+        if not scene:
+            return
+
+        # 利用 to_dict / from_dict 深拷贝
+        new_scene = Scene.from_dict(scene.to_dict())
+        new_scene.id = str(uuid.uuid4())
+        new_scene.name = scene.name + " - 副本"
+        new_scene.is_default = False  # 副本不设为默认
+
+        # 为 actions / anchors 重新生成 ID（防止重复）
+        for action in new_scene.actions:
+            action.id = str(uuid.uuid4())
+        for anchor in getattr(new_scene, "anchors", []):
+            anchor.id = str(uuid.uuid4())
+
+        self.current_project.add_scene(new_scene)
+        self.project_manager.save_project(self.current_project)
+        self.load_scenes()
+
+    def copy_action(self, action_id: str):
+        """复制操作"""
+        if not self.current_scene:
+            return
+        action = self.current_scene.get_action(action_id)
+        if not action:
+            return
+
+        new_action = action.clone()
+        self.current_scene.add_action(new_action)
+        self.project_manager.save_project(self.current_project)
+        self.load_actions()
+        self.load_scenes()  # 更新场景行里显示的操作数        
